@@ -1,6 +1,7 @@
 import xarray as xr
 import matplotlib.pyplot as plt
 import streamlit as st
+import os  # <--- ADD THIS NEW LINE
 
 # --- Page Setup ---
 st.set_page_config(layout="wide")
@@ -12,12 +13,18 @@ FREEZING_POINT = 273.15
 # --- Data Loading Functions ---
 @st.cache_data
 def load_data(filename):
-    print(f"Loading data from: {filename}")
+    # Get the folder where this script is actually running
+    current_folder = os.path.dirname(os.path.abspath(__file__))
+    
+    # Combine it with the filename to get the correct full path
+    full_path = os.path.join(current_folder, filename)
+    
+    print(f"Loading data from: {full_path}")
     try:
-        data = xr.open_dataset(filename, decode_times=False)
+        data = xr.open_dataset(full_path, decode_times=False)
         return data
     except Exception as e:
-        st.error(f"Error loading {filename}: {e}. Make sure it's on your Desktop.")
+        st.error(f"Error loading {filename}: {e}")
         return None
 
 # --- Calculation Function ---
@@ -100,7 +107,9 @@ day = st.slider("Select a Day in December", min_value=1, max_value=31, value=1)
 
 # 2. Define the File Path (pointing to your clean 'data' folder)
 # The f-string inserts the slider number into the filename
-file_path = f"data/december_day_{day}.nc"
+# REPLACE the old file_path line with these two lines:
+current_folder = os.path.dirname(os.path.abspath(__file__))
+file_path = os.path.join(current_folder, "data", f"december_day_{day}.nc")
 
 # 3. Load and Visualize
 if os.path.exists(file_path):
